@@ -1,7 +1,7 @@
-
-
 export default function Home() {
   return (
-    <div>Home</div>
-  )
+    <div className="container mx-auto px-4 flex h-16 items-center justify-between gap-4">
+      Home
+    </div>
+  );
 }
