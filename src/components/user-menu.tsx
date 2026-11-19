@@ -7,11 +7,7 @@ import {
   UserPenIcon,
 } from "lucide-react";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -26,10 +22,16 @@ import {
 export default function UserMenu() {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button className="h-auto p-0 hover:bg-transparent" variant="ghost" />}><Avatar>
-                      <AvatarImage alt="Profile image" src="/origin/avatar.jpg" />
-                      <AvatarFallback>KK</AvatarFallback>
-                    </Avatar></DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={
+          <Button className="h-auto p-0 hover:bg-transparent" variant="ghost" />
+        }
+      >
+        <Avatar>
+          <AvatarImage alt="Profile image" src="/origin/avatar.jpg" />
+          <AvatarFallback>KK</AvatarFallback>
+        </Avatar>
+      </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="max-w-64">
         <DropdownMenuLabel className="flex min-w-0 flex-col">
           <span className="truncate font-medium text-foreground text-sm">
