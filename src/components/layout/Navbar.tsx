@@ -1,12 +1,15 @@
 import {
-  FileTextIcon,
+  BookMarkedIcon,
+  CalendarClockIcon,
+  FolderKanbanIcon,
   GlobeIcon,
   HomeIcon,
-  LayersIcon,
   MenuIcon,
-  UsersIcon,
+  ShoppingCartIcon,
+  SquarePenIcon,
 } from "lucide-react";
 import { useId, useState } from "react";
+import { Link, useLocation } from "react-router"; // or "react-router-dom"
 
 import Logo from "@/components/logo";
 import UserMenu from "@/components/user-menu";
@@ -37,35 +40,50 @@ import {
 } from "@/components/ui/tooltip";
 import { ModeToggle } from "./ModeToggler";
 
-// Navigation links
 const navigationLinks = [
-  { active: true, href: "#", icon: HomeIcon, label: "Dashboard" },
-  { href: "#", icon: LayersIcon, label: "Projects" },
-  { href: "#", icon: FileTextIcon, label: "Documentation" },
-  { href: "#", icon: UsersIcon, label: "Team" },
+  { href: "/", icon: HomeIcon, label: "Home" },
+  { href: "/jcc", icon: SquarePenIcon, label: "JCC" },
+  { href: "/ir", icon: BookMarkedIcon, label: "IR" },
+  { href: "/ncr", icon: SquarePenIcon, label: "NCR" },
+  { href: "/Wopr", icon: ShoppingCartIcon, label: "WO&PR Home" },
+  {
+    href: "/timesheet",
+    icon: CalendarClockIcon,
+    label: "Timesheet (Sr. Mgr.)",
+  },
+  { href: "/catalogs", icon: FolderKanbanIcon, label: "Catalogs" },
 ];
 
-// Language options
 const languages = [
   { label: "En", value: "en" },
-  { label: "Es", value: "es" },
-  { label: "Fr", value: "fr" },
-  { label: "De", value: "de" },
-  { label: "Ja", value: "ja" },
+  { label: "Ar", value: "ar" },
 ];
 
-export default function Navbar() {
+type NavbarProps = {
+  activeNav?: string;
+  onSelectNav?: (label: string) => void;
+};
+
+export default function Navbar({ activeNav, onSelectNav }: NavbarProps) {
   const id = useId();
+  const { pathname } = useLocation();
   const [language, setLanguage] = useState("en");
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const checkIsActive = (href: string, label: string) => {
+    if (activeNav) return activeNav === label;
+    if (href === "/") return pathname === "/";
+    return pathname.toLowerCase().startsWith(href.toLowerCase());
+  };
 
   return (
     <header className="w-full border-b bg-background">
       {/* Top Banner Bar */}
-      <div className="bg-gradient-to-r from-indigo-900 via-purple-800 to-purple-300/60 dark:from-indigo-950 dark:via-purple-950 dark:to-purple-900/60 text-white">
+      <div className="bg-gradient-to-r from-[#58377a] via-[#7c5f99] to-[#dcd4e6] dark:from-indigo-950 dark:via-purple-950 dark:to-purple-900/70 text-white">
         <div className="container mx-auto flex h-14 sm:h-16 items-center justify-between gap-2 px-3 sm:px-6">
-          {/* Left side: Mobile trigger + Logo */}
+          {/* Left side: Mobile menu trigger + Logo & Dammam Airports */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <Popover>
+            <Popover open={mobileOpen} onOpenChange={setMobileOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
@@ -76,24 +94,34 @@ export default function Navbar() {
                   <MenuIcon size={20} />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent align="start" className="w-48 p-1.5 md:hidden">
+              <PopoverContent align="start" className="w-56 p-1.5 md:hidden">
                 <NavigationMenu className="max-w-none *:w-full">
                   <NavigationMenuList className="flex-col items-stretch gap-0.5">
                     {navigationLinks.map((link) => {
                       const Icon = link.icon;
+                      const isActive = checkIsActive(link.href, link.label);
                       return (
                         <NavigationMenuItem className="w-full" key={link.label}>
-                          <NavigationMenuLink
-                            active={link.active}
-                            className="flex flex-row items-center gap-2.5 rounded-md px-2.5 py-2 text-sm"
-                            href={link.href}
-                          >
-                            <Icon
-                              aria-hidden="true"
-                              className="text-muted-foreground shrink-0"
-                              size={16}
-                            />
-                            <span className="truncate">{link.label}</span>
+                          <NavigationMenuLink asChild active={isActive}>
+                            <Link
+                              to={link.href}
+                              onClick={() => {
+                                onSelectNav?.(link.label);
+                                setMobileOpen(false);
+                              }}
+                              className={`flex flex-row items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors ${
+                                isActive
+                                  ? "bg-[#58377a]/15 font-semibold text-[#3b1d68] dark:bg-purple-500/20 dark:text-purple-200"
+                                  : "text-foreground hover:bg-accent"
+                              }`}
+                            >
+                              <Icon
+                                aria-hidden="true"
+                                className="text-[#3b1d68] dark:text-purple-300 shrink-0"
+                                size={16}
+                              />
+                              <span className="truncate">{link.label}</span>
+                            </Link>
                           </NavigationMenuLink>
                         </NavigationMenuItem>
                       );
@@ -103,24 +131,28 @@ export default function Navbar() {
               </PopoverContent>
             </Popover>
 
-            <a
-              className="flex items-center gap-2 font-semibold tracking-tight text-white hover:opacity-90 shrink-0"
-              href="#"
+            <Link
+              to="/"
+              onClick={() => onSelectNav?.("Home")}
+              className="flex items-center gap-2.5 font-semibold tracking-tight text-white hover:opacity-90 shrink-0"
             >
               <Logo />
-            </a>
+              <span className="text-base sm:text-xl font-bold tracking-normal text-white">
+                Dammam Airports
+              </span>
+            </Link>
           </div>
 
           {/* Right side: Theme toggle + Language selector + User menu */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 text-foreground shrink-0">
-            <div className="rounded-md bg-background/90 text-foreground backdrop-blur-xs">
+            <div className="rounded-md bg-background/85 text-foreground backdrop-blur-xs">
               <ModeToggle />
             </div>
 
             <Select value={language} onValueChange={setLanguage}>
               <SelectTrigger
                 aria-label="Select language"
-                className="h-8 w-auto gap-1.5 rounded-md border-none bg-background/90 px-2 text-xs sm:text-sm text-foreground shadow-none backdrop-blur-xs hover:bg-background [&>svg]:shrink-0 [&>svg]:text-muted-foreground"
+                className="h-8 w-auto gap-1.5 rounded-md border-none bg-background/85 px-2 text-xs sm:text-sm text-foreground shadow-none backdrop-blur-xs hover:bg-background [&>svg]:shrink-0 [&>svg]:text-muted-foreground"
                 id={`language-${id}`}
               >
                 <GlobeIcon aria-hidden="true" size={15} />
@@ -137,7 +169,7 @@ export default function Navbar() {
               </SelectContent>
             </Select>
 
-            <div className="flex items-center rounded-full bg-background/95 px-1.5 py-0.5 text-foreground shadow-xs">
+            <div className="flex items-center rounded-full bg-background/90 px-1.5 py-0.5 text-foreground shadow-xs">
               <UserMenu />
             </div>
           </div>
@@ -145,7 +177,7 @@ export default function Navbar() {
       </div>
 
       {/* Secondary Navigation Bar (Tablet & Desktop) */}
-      <div className="hidden md:block bg-muted/40 border-t">
+      <div className="hidden md:block bg-[#f3f3f5] dark:bg-muted/40 border-b">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-11 items-center justify-between gap-4 overflow-x-auto">
             <NavigationMenu className="max-w-none justify-start">
@@ -153,27 +185,33 @@ export default function Navbar() {
                 <TooltipProvider>
                   {navigationLinks.map((link) => {
                     const Icon = link.icon;
+                    const isActive = checkIsActive(link.href, link.label);
                     return (
                       <NavigationMenuItem key={link.label}>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <NavigationMenuLink
-                              active={link.active}
-                              className={`flex h-9 flex-row items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors ${
-                                link.active
-                                  ? "bg-accent text-primary"
-                                  : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
-                              }`}
-                              href={link.href}
-                            >
-                              <Icon aria-hidden="true" size={17} />
-                              {/* Icon-only on md, icon + label on lg+ */}
-                              <span className="hidden lg:inline">
-                                {link.label}
-                              </span>
-                              <span className="sr-only lg:hidden">
-                                {link.label}
-                              </span>
+                            <NavigationMenuLink asChild active={isActive}>
+                              <Link
+                                to={link.href}
+                                onClick={() => onSelectNav?.(link.label)}
+                                className={`relative flex h-9 flex-row items-center gap-1.5 whitespace-nowrap rounded-md px-3 text-xs lg:text-sm font-semibold transition-colors ${
+                                  isActive
+                                    ? "bg-[#58377a]/12 text-[#2c1352] dark:bg-purple-500/20 dark:text-purple-200 ring-1 ring-[#58377a]/25"
+                                    : "text-[#3b1d68]/80 dark:text-muted-foreground hover:bg-black/5 dark:hover:bg-accent/60 hover:text-[#2c1352] dark:hover:text-foreground"
+                                }`}
+                              >
+                                <Icon
+                                  aria-hidden="true"
+                                  className="shrink-0 text-[#3b1d68] dark:text-purple-300"
+                                  size={16}
+                                />
+                                <span className="hidden lg:inline">
+                                  {link.label}
+                                </span>
+                                <span className="sr-only lg:hidden">
+                                  {link.label}
+                                </span>
+                              </Link>
                             </NavigationMenuLink>
                           </TooltipTrigger>
                           <TooltipContent
